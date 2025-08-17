@@ -48,43 +48,28 @@ public class Program
         ConfigureSemanticKernel(services, configuration);
 
         // Register application services
-        services.AddHostedService<ContactAssistantService>();
+        services.AddHostedService<ApplicationHostService>();
     }
 
     private static void ConfigureSemanticKernel(IServiceCollection services, IConfiguration configuration)
     {
-        // Try Azure OpenAI first, fallback to OpenAI
+        // Configure Azure OpenAI
         var azureEndpoint = configuration["AzureOpenAI:Endpoint"];
         var azureApiKey = configuration["AzureOpenAI:ApiKey"];
         var deploymentName = configuration["AzureOpenAI:DeploymentName"];
 
-        if (!string.IsNullOrEmpty(azureEndpoint) && !string.IsNullOrEmpty(azureApiKey))
+        if (string.IsNullOrEmpty(azureEndpoint) || string.IsNullOrEmpty(azureApiKey))
         {
-            // Use Azure OpenAI
-            services.AddKernel()
-                .AddAzureOpenAIChatCompletion(
-                    deploymentName: deploymentName ?? "gpt-4",
-                    endpoint: azureEndpoint,
-                    apiKey: azureApiKey
-                );
+            throw new InvalidOperationException(
+                "Azure OpenAI configuration is required. Please set AzureOpenAI:Endpoint and AzureOpenAI:ApiKey in appsettings.json");
         }
-        else
-        {
-            // Fallback to regular OpenAI
-            var openAiApiKey = GetApiKey(configuration);
-            services.AddKernel()
-                .AddOpenAIChatCompletion(
-                    modelId: "gpt-4", 
-                    apiKey: openAiApiKey
-                );
-        }
-    }
 
-    private static string GetApiKey(IConfiguration configuration)
-    {
-        return configuration["OpenAI:ApiKey"] ?? 
-               Environment.GetEnvironmentVariable("OPENAI_API_KEY") ?? 
-               "demo-key-replace-with-real-key";
+        services.AddKernel()
+            .AddAzureOpenAIChatCompletion(
+                deploymentName: deploymentName ?? "gpt-4.1",
+                endpoint: azureEndpoint,
+                apiKey: azureApiKey
+            );
     }
 
     private static void ConfigureLogging(HostBuilderContext context, ILoggingBuilder logging)

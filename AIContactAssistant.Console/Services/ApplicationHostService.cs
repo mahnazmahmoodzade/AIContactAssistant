@@ -7,15 +7,15 @@ using AIContactAssistant.Console.Extensions;
 namespace AIContactAssistant.Console.Services;
 
 /// <summary>
-/// Contact Assistant Service - handles AI-powered customer interactions
+/// Application host service - manages application lifecycle, plugin registration, and startup orchestration
 /// </summary>
-public class ContactAssistantService : BackgroundService
+public class ApplicationHostService : BackgroundService
 {
     private readonly Kernel _kernel;
     private readonly IServiceProvider _serviceProvider;
-    private readonly ILogger<ContactAssistantService> _logger;
+    private readonly ILogger<ApplicationHostService> _logger;
 
-    public ContactAssistantService(Kernel kernel, IServiceProvider serviceProvider, ILogger<ContactAssistantService> logger)
+    public ApplicationHostService(Kernel kernel, IServiceProvider serviceProvider, ILogger<ApplicationHostService> logger)
     {
         _kernel = kernel;
         _serviceProvider = serviceProvider;
@@ -27,20 +27,20 @@ public class ContactAssistantService : BackgroundService
         // Register plugins with the kernel silently
         _kernel.RegisterAllPlugins(_serviceProvider);
         
-        // Execute the sales inquiry scenario
-        await ExecuteSalesScenario();
+        // Execute the customer conversation workflow
+        await ExecuteCustomerWorkflow();
         
         // Exit the application after scenario completion
         Environment.Exit(0);
     }
 
-    private async Task ExecuteSalesScenario()
+    private async Task ExecuteCustomerWorkflow()
     {
         try
         {
-            // Start the interactive LLM-driven conversation
-            var conversationService = new LLMDrivenScenarioService(_kernel, _serviceProvider.GetService<ILogger<LLMDrivenScenarioService>>()!);
-            await conversationService.ExecuteLLMDrivenScenario();
+            // Start the interactive customer conversation
+            var conversationService = new ConversationService(_kernel, _serviceProvider.GetService<ILogger<ConversationService>>()!);
+            await conversationService.StartCustomerConversation();
         }
         catch (Exception ex)
         {

@@ -7,15 +7,15 @@ using AIContactAssistant.Console.Extensions;
 namespace AIContactAssistant.Console.Services;
 
 /// <summary>
-/// Demonstrates real LLM-driven tool calling using Semantic Kernel's automatic function calling
+/// Conversation service that handles interactive customer conversations using AI-powered assistance
 /// </summary>
-public class LLMDrivenScenarioService
+public class ConversationService
 {
     private readonly Kernel _kernel;
     private readonly IChatCompletionService _chatCompletionService;
-    private readonly ILogger<LLMDrivenScenarioService> _logger;
+    private readonly ILogger<ConversationService> _logger;
 
-    public LLMDrivenScenarioService(Kernel kernel, ILogger<LLMDrivenScenarioService> logger)
+    public ConversationService(Kernel kernel, ILogger<ConversationService> logger)
     {
         _kernel = kernel;
         _chatCompletionService = kernel.GetRequiredService<IChatCompletionService>();
@@ -23,9 +23,9 @@ public class LLMDrivenScenarioService
     }
 
     /// <summary>
-    /// Execute a real interactive console conversation with LLM-driven tool calling
+    /// Execute an interactive customer service conversation with AI-powered assistance
     /// </summary>
-    public async Task<object> ExecuteLLMDrivenScenario()
+    public async Task<object> StartCustomerConversation()
     {
         try
         {
@@ -37,24 +37,24 @@ public class LLMDrivenScenarioService
             // Create chat history
             var chatHistory = new ChatHistory();
 
-            // System prompt to define the AI assistant's role and capabilities
-            var systemPrompt = @"You are an expert telecom customer service AI assistant. You have access to various tools to help customers with their telecommunications needs.
+            // System prompt to define the AI assistant's role and personality (not function descriptions)
+            var systemPrompt = @"You are a friendly and professional telecom customer service representative. 
 
-Your available tools include:
-- Address validation and serviceability checking
-- Product catalog search and recommendations  
-- Personalized offer creation and order processing
-- Identity verification (KYC) and eSIM provisioning
-- Notifications and CRM logging
-- Privacy protection (PII redaction)
+Your personality:
+- Helpful and patient with customers
+- Professional but conversational tone
+- Proactive in identifying customer needs
+- Always explain what you're doing and why
 
-When a customer contacts you:
-1. Understand their needs through natural conversation
-2. Use appropriate tools to gather information and process requests
-3. Provide helpful, accurate responses based on tool outputs
-4. Complete the full customer journey from inquiry to activation
+Customer service guidelines:
+- Greet customers warmly
+- Listen to their needs carefully
+- Use available tools to help them efficiently
+- Provide clear explanations of services and pricing
+- Complete the full customer journey from inquiry to resolution
+- Always confirm customer satisfaction before ending
 
-Be conversational, helpful, and explain what you're doing at each step. Always acknowledge what tools you're using and why.";
+You have access to various business tools that will help you assist customers effectively.";
 
             chatHistory.AddSystemMessage(systemPrompt);
 
@@ -125,19 +125,19 @@ Be conversational, helpful, and explain what you're doing at each step. Always a
 
             return new
             {
-                scenarioStatus = "completed_successfully",
+                sessionStatus = "completed_successfully",
                 startTime = startTime,
                 endTime = endTime,
                 duration = duration.ToString(@"mm\:ss"),
-                approach = "Interactive LLM-driven with real-time tool calling",
-                toolsUsed = "Determined dynamically by LLM based on conversation",
+                serviceType = "Interactive customer service with AI assistance",
+                toolsUsed = "Determined dynamically by AI based on customer needs",
                 conversationTurns = conversationTurns,
                 totalMessages = chatHistory.Count
             };
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "❌ Error during interactive conversation");
+            _logger.LogError(ex, "❌ Error during customer conversation");
             System.Console.WriteLine($"❌ Error: {ex.Message}");
             throw;
         }
